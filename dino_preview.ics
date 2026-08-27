@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Dino Bot//Blessing Card//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260827
+DTEND;VALUE=DATE:20260827
+DTSTAMP:20260827T091528Z
+UID:a27fe123-6a0a-41e1-956c-4482faad72a7@dino-bot
+SUMMARY:🦕 Dino 的每日祝福
+DESCRIPTION:ZH: 愿你有深邃的暖阳的明媚，有璀璨的晚霞的从容，安放你的身心，愿你所有的美好都如期而至。\nEN: May you have the radiance of profound warm sun, the calm of dazzling sunset, settle your mind, May all good things come in due time.\nFR: Puisses-tu avoir le rayonnement du profond soleil chaud, le calme du éclatant coucher, apaise ton esprit, Que toutes les bonnes choses arrivent à temps.\nDE: Mögest du die Strahlkraft des tief warme Sonne, die Ruhe des funkelnd Sonnenuntergang haben, bringe deinen Geist zur Ruhe, Mögen alle guten Dinge zur rechten Zeit kommen.
+LOCATION:中国赣北
+STATUS:CONFIRMED
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-PT0M
+ACTION:DISPLAY
+DESCRIPTION:Dino 的祝福来啦！
+END:VALARM
+END:VEVENT
+END:VCALENDAR

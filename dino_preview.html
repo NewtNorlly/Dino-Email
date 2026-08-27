@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style type="text/css">
+  @keyframes dinoWalk {
+    0%   { transform: translateX(0) scaleX(1); }
+    45%  { transform: translateX(-260px) scaleX(1); }
+    50%  { transform: translateX(-260px) scaleX(-1); }
+    95%  { transform: translateX(0) scaleX(-1); }
+    100% { transform: translateX(0) scaleX(1); }
+  }
+  @keyframes dinoBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulseBg {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  .dino-walk {
+    display: inline-block;
+    animation: dinoWalk 9s ease-in-out infinite, dinoBob 0.7s ease-in-out infinite;
+    font-size: 28px;
+  }
+  .fade-in {
+    animation: fadeInUp 0.8s ease-out both;
+  }
+  .pulse-bg {
+    background: linear-gradient(135deg, rgba(26,42,108,0.12), rgba(45,74,138,0.10), rgba(74,111,165,0.12), rgba(135,168,201,0.10));
+    background-size: 400% 400%;
+    animation: pulseBg 20s ease infinite;
+  }
+  /* ===== 响应式适配 ===== */
+  @media only screen and (max-width: 480px) {
+    .outer-wrap { padding: 20px 10px !important; }
+    .main-card { padding: 24px 18px 20px 18px !important; border-radius: 16px !important; }
+    .blessing-box { padding: 18px 16px !important; border-radius: 12px !important; }
+    .date-text { font-size: 17px !important; }
+    .intro-text { font-size: 17px !important; line-height: 1.8 !important; }
+    .zh-text { font-size: 18px !important; line-height: 1.8 !important; }
+    .foreign-text { font-size: 16px !important; line-height: 1.7 !important; }
+    .dino-walk { font-size: 24px !important; }
+    .dino-track { height: 34px !important; }
+  }
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    .outer-wrap { padding: 28px 14px !important; }
+    .main-card { padding: 30px 24px 26px 24px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dino-walk, .fade-in, .pulse-bg { animation: none !important; }
+  }
+</style>
+</head>
+<body class="pulse-bg" style="margin:0;padding:0;font-family:'Times New Roman','SimSun','宋体',serif;min-height:100vh;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<div class="outer-wrap" style="max-width:560px;margin:0 auto;padding:35px 16px;">
+  
+  <div class="main-card" style="background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:20px;padding:36px 32px 30px 32px;box-shadow:0 6px 30px rgba(26,42,108,0.10);">
+    
+    <!-- 顶部蓝色装饰线 -->
+    <div style="height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#2d4a8a,#4a6fa5,transparent);margin:-8px 0 24px 0;"></div>
+    
+    <!-- 小恐龙走动区域 -->
+    <div class="dino-track" style="background:linear-gradient(90deg,rgba(45,74,138,0.06),rgba(74,111,165,0.08),rgba(45,74,138,0.06));border-radius:12px;height:40px;overflow:hidden;margin-bottom:20px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;">
+      <span class="dino-walk">🦕</span>
+    </div>
+    
+    <!-- 日期 -->
+    <p class="date-text fade-in" style="font-size:20px;color:#5a6f8a;margin:0 0 20px 0;letter-spacing:2px;text-align:center;">2026年08月27日</p>
+    
+    <!-- 开场白 -->
+    <p class="intro-text fade-in" style="font-size:19px;line-height:1.85;color:#3a4a5e;margin:0 0 22px 0;text-indent:2em;">你好啊，我是 Dino，一个小机器人，来自中国的赣北地区。新的一天，愿你有更多的惊喜和欢欣。</p>
+    
+    <!-- 简洁分隔线 -->
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#c5d5e8,transparent);margin:0 0 22px 0;"></div>
+    
+    <!-- 祝福区 -->
+    <div class="blessing-box" style="background:rgba(245,248,252,0.7);border-radius:14px;padding:24px 22px;">
+      <p class="zh-text fade-in" style="font-size:21px;line-height:1.85;color:#1e2f44;margin:0 0 14px 0;text-indent:2em;">你有没有过这种感觉？就是注意到旧书的纸张味的时候，突然觉得活着还挺好的。今天也去找找这种感觉吧。</p>
+      <p class="foreign-text fade-in" style="font-size:22px;line-height:1.75;color:#5a6f8a;margin:0 0 12px 0;text-indent:2em;">Ever had that feeling? When you notice smell of old book pages, you suddenly think life's pretty great. Go find that feeling today too.</p>
+      <p class="foreign-text fade-in" style="font-size:22px;line-height:1.75;color:#5a6f8a;margin:0 0 12px 0;text-indent:2em;">Tu as déjà eu ce sentiment ? Quand tu remarques odeur des pages d'un vieux livre, tu penses soudain que la vie est plutôt géniale. Va trouver ce sentiment aujourd'hui aussi.</p>
+      <p class="foreign-text fade-in" style="font-size:22px;line-height:1.75;color:#5a6f8a;margin:0;text-indent:2em;">Hast du schon mal dieses Gefühl gehabt? Wenn du Geruch alter Buchseiten bemerkst, denkst du plötzlich, dass das Leben ziemlich schön ist. Geh heute auch dieses Gefühl suchen.</p>
+    </div>
+    
+    <!-- 落款 -->
+    <p style="font-size:15px;color:#8a9bb0;margin:20px 0 0 0;text-align:center;">— Dino</p>
+    
+  </div>
+  
+</div>
+</body>
+</html>

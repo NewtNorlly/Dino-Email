@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.sessions/
+.tmp-tool-results/
+.env
+.DS_Store
+dino-outlook-bot/

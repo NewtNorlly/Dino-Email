@@ -1,0 +1,25 @@
+name: Dino Daily Blessing Email
+
+on:
+  schedule:
+    # 日本时间 每天早上 7:30 (UTC+9) = UTC 22:30
+    # 如需北京时间 7:30，改为: 30 23 * * *
+    - cron: '30 22 * * *'
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  send-emails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Send daily blessing emails
+        env:
+          MATON_API_KEY: ${{ secrets.MATON_API_KEY }}
+        run: python dino_broadcast.py --send
