@@ -25,11 +25,11 @@ MATON_API_KEY = 你的 Maton OAuth API Key
 
 ### 3. 定时发送
 
-GitHub Actions 会在每天日本时间 7:30 自动触发（见 `.github/workflows/daily-email.yml`）。
+GitHub Actions 会在每天北京时间 7:30 自动触发（见 `.github/workflows/daily-email.yml`）。
 
 如需修改时间，编辑 workflow 中的 `cron` 表达式（UTC 时间）：
-- 日本时间 7:30 → `30 22 * * *`
 - 北京时间 7:30 → `30 23 * * *`
+- 日本时间 7:30 → `30 22 * * *`
 
 ## 手动发送
 
