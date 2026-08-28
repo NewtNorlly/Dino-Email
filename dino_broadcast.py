@@ -279,6 +279,28 @@ def send_mail(to, subject, html_body, api_key):
     payload = {"message":{"subject":subject,"body":{"contentType":"Html","content":html_body},"toRecipients":[{"emailAddress":{"address":to}}]},"saveToSentItems":True}
     return api_call("POST", "/me/sendMail", payload, api_key)
 
+def get_sent_recipients(api_key, top=100):
+    """查询已发送文件夹中最近的 Dino 祝福邮件，返回已成功送达的收件人地址集合（小写）"""
+    path = f"/me/mailFolders/SentItems/messages?$top={top}&$select=subject,toRecipients,receivedDateTime"
+    code, body = api_call("GET", path, None, api_key)
+    if code != 200:
+        print(f"  [查询已发送] API 返回 {code}，跳过本轮状态检查")
+        return None
+    try:
+        data = json.loads(body)
+        recipients = set()
+        for msg in data.get("value", []):
+            subj = msg.get("subject", "")
+            if "Dino" in subj and "祝福" in subj:
+                for r in msg.get("toRecipients", []):
+                    addr = r.get("emailAddress", {}).get("address", "").lower().strip()
+                    if addr:
+                        recipients.add(addr)
+        return recipients
+    except Exception as e:
+        print(f"  [查询已发送] 解析失败: {e}")
+        return None
+
 def load_recipients():
     """从 recipients.txt 读取收件人列表，每行一个邮箱"""
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "recipients.txt")
@@ -297,6 +319,8 @@ def main():
     parser.add_argument("--preview", action="store_true")
     parser.add_argument("--send", action="store_true")
     parser.add_argument("--count", type=int, default=1000)
+    parser.add_argument("--retries", type=int, default=3, help="最大重试轮数（默认3）")
+    parser.add_argument("--retry-delay", type=int, default=45, help="每轮重试前等待秒数，用于查询已发送状态（默认45）")
     args = parser.parse_args()
     api_key = os.environ.get("MATON_API_KEY")
     if not api_key: print("Error: set MATON_API_KEY"); sys.exit(1)
@@ -319,23 +343,75 @@ def main():
         print(f"ZH: {b['zh'][:60]}...")
         return
     if args.send:
-        print(f"\nSubject: {SUBJECT}\nRecipients: {len(RECIPIENTS)}\n")
-        chosen = random.sample(blessings, min(len(RECIPIENTS), len(blessings)))
-        success = failed = 0
-        for i, (addr, bls) in enumerate(zip(RECIPIENTS, chosen), 1):
-            print(f"[{i}/{len(RECIPIENTS)}] {addr} ...", end=" ", flush=True)
-            code, body = send_mail(addr, SUBJECT, build_html(bls), api_key)
-            if code in (200, 202): print("✓ sent"); success += 1
-            else:
-                print(f"✗ failed ({code})")
-                if body: print(f"    {body[:200]}")
-                failed += 1
-            # 每发10封停10秒
-            if i % 10 == 0 and i < len(RECIPIENTS):
-                print(f"  --- 已发 {i} 封，休息 10 秒 ---", flush=True)
-                time.sleep(10)
-            if i < len(RECIPIENTS): time.sleep(2)
-        print(f"\nDone: {success} sent, {failed} failed")
+        print(f"\nSubject: {SUBJECT}")
+        print(f"Recipients: {len(RECIPIENTS)}")
+        print(f"Max retries: {args.retries}, retry delay: {args.retry_delay}s\n")
+
+        pending = list(RECIPIENTS)      # 待发送列表
+        confirmed_sent = set()           # 已确认在已发送文件夹中的地址（小写）
+
+        for round_num in range(args.retries + 1):
+            if not pending:
+                break
+
+            # 从第2轮开始：先等待，再查询已发送状态，剔除已送达的
+            if round_num > 0:
+                print(f"\n--- 第 {round_num} 轮重试前检查：等待 {args.retry_delay}s 后查询已发送邮件 ---")
+                time.sleep(args.retry_delay)
+                sent_set = get_sent_recipients(api_key)
+                if sent_set is not None:
+                    newly_confirmed = [r for r in pending if r.lower() in sent_set]
+                    pending = [r for r in pending if r.lower() not in sent_set]
+                    confirmed_sent.update(r.lower() for r in newly_confirmed)
+                    print(f"  已确认送达: {len(newly_confirmed)} 封，剩余待重发: {len(pending)} 封")
+                    if not pending:
+                        break
+                else:
+                    print(f"  已发送状态查询失败，本轮按 API 返回结果重试")
+
+            round_label = f"第 {round_num+1} 轮" if round_num > 0 else "首轮"
+            print(f"\n=== {round_label}发送：{len(pending)} 封 ===")
+
+            chosen = random.sample(blessings, min(len(pending), len(blessings)))
+            round_fail = []
+
+            for i, (addr, bls) in enumerate(zip(pending, chosen), 1):
+                print(f"[{i}/{len(pending)}] {addr} ...", end=" ", flush=True)
+                code, body = send_mail(addr, SUBJECT, build_html(bls), api_key)
+                if code in (200, 202):
+                    print("✓ 已提交")
+                else:
+                    print(f"✗ 失败 ({code})")
+                    if body:
+                        print(f"    {body[:200]}")
+                    round_fail.append(addr)
+                # 节流：每封间隔 2 秒，每 10 封多休 10 秒
+                if i % 10 == 0 and i < len(pending):
+                    print(f"  --- 已发 {i} 封，休息 10 秒 ---", flush=True)
+                    time.sleep(10)
+                if i < len(pending):
+                    time.sleep(2)
+
+            # 下一轮只重发 API 层面就失败的
+            pending = round_fail
+
+        # 最终确认：再等一轮，查询已发送状态
+        print(f"\n--- 最终确认：等待 {args.retry_delay}s 后查询已发送邮件 ---")
+        time.sleep(args.retry_delay)
+        sent_set = get_sent_recipients(api_key)
+        if sent_set is not None:
+            confirmed_sent.update(r.lower() for r in RECIPIENTS if r.lower() in sent_set)
+
+        final_success = [r for r in RECIPIENTS if r.lower() in confirmed_sent]
+        final_failed = [r for r in RECIPIENTS if r.lower() not in confirmed_sent]
+
+        print(f"\n{'='*50}")
+        print(f"最终结果：{len(final_success)} 成功送达，{len(final_failed)} 失败")
+        if final_failed:
+            print("失败列表：")
+            for r in final_failed:
+                print(f"  - {r}")
+        print(f"{'='*50}")
         return
     parser.print_help()
 
