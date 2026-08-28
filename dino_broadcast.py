@@ -321,7 +321,6 @@ def main():
     parser.add_argument("--count", type=int, default=1000)
     parser.add_argument("--retries", type=int, default=3, help="最大重试轮数（默认3）")
     parser.add_argument("--retry-delay", type=int, default=45, help="每轮重试前等待秒数，用于查询已发送状态（默认45）")
-    parser.add_argument("--limit", type=int, default=0, help="只发送前 N 个收件人（0=全部，测试用）")
     args = parser.parse_args()
     api_key = os.environ.get("MATON_API_KEY")
     if not api_key: print("Error: set MATON_API_KEY"); sys.exit(1)
@@ -344,9 +343,9 @@ def main():
         print(f"ZH: {b['zh'][:60]}...")
         return
     if args.send:
-        recipients = RECIPIENTS[:args.limit] if args.limit > 0 else RECIPIENTS
+        recipients = RECIPIENTS
         print(f"\nSubject: {SUBJECT}")
-        print(f"Recipients: {len(recipients)} (limit={args.limit or 'all'})")
+        print(f"Recipients: {len(recipients)}")
         print(f"Max retries: {args.retries}, retry delay: {args.retry_delay}s\n")
 
         pending = list(recipients)      # 待发送列表
