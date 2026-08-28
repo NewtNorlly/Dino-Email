@@ -2,8 +2,8 @@ name: Dino Daily Blessing Email
 
 on:
   schedule:
-    # 每 5 分钟一次（GitHub Actions 最短间隔）
-    - cron: '*/5 * * * *'
+    # 北京时间每天 07:30（UTC 23:30）
+    - cron: '30 23 * * *'
   workflow_dispatch:  # 支持手动触发
 
 # 防止上一次还没跑完就触发下一次
@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Send one test email
+      - name: Send daily emails to all recipients
         env:
           MATON_API_KEY: ${{ secrets.MATON_API_KEY }}
-        run: python dino_broadcast.py --send --limit 1 --retries 1 --retry-delay 10
+        run: python dino_broadcast.py --send --retries 3 --retry-delay 45
