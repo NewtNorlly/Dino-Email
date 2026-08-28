@@ -321,6 +321,7 @@ def main():
     parser.add_argument("--count", type=int, default=1000)
     parser.add_argument("--retries", type=int, default=3, help="最大重试轮数（默认3）")
     parser.add_argument("--retry-delay", type=int, default=45, help="每轮重试前等待秒数，用于查询已发送状态（默认45）")
+    parser.add_argument("--limit", type=int, default=0, help="只发送前 N 个收件人（0=全部，测试用）")
     args = parser.parse_args()
     api_key = os.environ.get("MATON_API_KEY")
     if not api_key: print("Error: set MATON_API_KEY"); sys.exit(1)
@@ -343,11 +344,12 @@ def main():
         print(f"ZH: {b['zh'][:60]}...")
         return
     if args.send:
+        recipients = RECIPIENTS[:args.limit] if args.limit > 0 else RECIPIENTS
         print(f"\nSubject: {SUBJECT}")
-        print(f"Recipients: {len(RECIPIENTS)}")
+        print(f"Recipients: {len(recipients)} (limit={args.limit or 'all'})")
         print(f"Max retries: {args.retries}, retry delay: {args.retry_delay}s\n")
 
-        pending = list(RECIPIENTS)      # 待发送列表
+        pending = list(recipients)      # 待发送列表
         confirmed_sent = set()           # 已确认在已发送文件夹中的地址（小写）
 
         for round_num in range(args.retries + 1):
@@ -400,10 +402,10 @@ def main():
         time.sleep(args.retry_delay)
         sent_set = get_sent_recipients(api_key)
         if sent_set is not None:
-            confirmed_sent.update(r.lower() for r in RECIPIENTS if r.lower() in sent_set)
+            confirmed_sent.update(r.lower() for r in recipients if r.lower() in sent_set)
 
-        final_success = [r for r in RECIPIENTS if r.lower() in confirmed_sent]
-        final_failed = [r for r in RECIPIENTS if r.lower() not in confirmed_sent]
+        final_success = [r for r in recipients if r.lower() in confirmed_sent]
+        final_failed = [r for r in recipients if r.lower() not in confirmed_sent]
 
         print(f"\n{'='*50}")
         print(f"最终结果：{len(final_success)} 成功送达，{len(final_failed)} 失败")
