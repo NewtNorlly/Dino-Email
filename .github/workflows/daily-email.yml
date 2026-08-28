@@ -6,6 +6,11 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:  # 支持手动触发
 
+# 防止上一次还没跑完就触发下一次
+concurrency:
+  group: dino-email
+  cancel-in-progress: false
+
 jobs:
   send-emails:
     runs-on: ubuntu-latest
